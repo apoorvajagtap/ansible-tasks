@@ -1,0 +1,22 @@
+---
+- name: Clien side sambe
+  hosts: all
+  tasks:
+        - name: Install packages
+          yum:
+                name: samba-client, cifs-utils
+                state: latest
+       # - name: Check for server shares
+        #  command: smbclient -L 192.168.122.67
+        - name: Create mount point
+          file:
+                path: /mnt/smbshare
+                state: directory
+        - name: mount the shares
+          mount:
+                path: /mnt/smbshare
+                backup: yes
+                src: //192.168.122.67/sharename
+                fstype: cifs
+                opts: default,_netdev
+                state: present

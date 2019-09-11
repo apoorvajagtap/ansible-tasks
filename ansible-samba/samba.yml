@@ -1,0 +1,54 @@
+---
+- name: Share a directory through Samba
+  hosts: all
+  tasks:
+        - name: Install samba package
+          yum:
+                name: samba, samba-client, cifs-utils
+                state: latest
+        - name: Create the directory to be shared
+          file:
+                path: /samba
+                state: directory
+                mode: "2775" 
+        - name: Make changes in configuration file
+          blockinfile:
+                path: /etc/samba/smb.conf  
+                backup: yes
+                block: |
+                        [sharename]
+                        path = /samba
+                        browseable = yes
+                        public = yes
+        - name: tom | Add the user
+          user:
+                name: tom
+                shell: /sbin/nologin
+                uid: 2001
+          become: true
+       # - name: Add samba password
+        #  command: smbpasswd -a tom
+        - name: Add selinux context to file
+          sefcontext:
+                target: '/samba(/.*)?'
+                setype: samba_share_t
+                state: present
+                reload: true
+        - name: Reload the SELinux changes
+          command: restorecon -RFv /samba
+        - name: Start the nmb  service
+          service:
+                name:  nmb
+                state: started
+                enabled: yes
+        - name: Start the smb  service
+          service:
+                name:  smb
+                state: started
+                enabled: yes
+        - name: Add firewall
+          firewalld:
+                service: samba
+                permanent: yes
+                immediate: true
+                state: enabled
