@@ -1,0 +1,12 @@
+   ansible localhost -m ping
+   ansible localhost -m copy -a "content='Ansible is goodll' dest=./motd"
+   ansible localhost -m copy -a "content='Ansible is good' dest=./motd"
+   ansible localhost -m copy -a "echo 'Ansible is good' dest=./motd"
+   ansible localhost -m command "echo 'Ansible is good' dest=./motd"
+   ansible localhost -m command "echo 'Ansible is good' > ./motd"
+   ansible localhost -m command -a "echo 'Ansible is good' > ./motd"
+   ansible localhost -m lineinfile -a "dest=./motd line='Ansible'"
+   ansible localhost -m lineinfile -a "path=./motd line='Ansible'"
+   ansible localhost -m lineinfile -a "path=./motd regex='^Ansible' line='Ansible is ok'"
+   ansible localhost -m lineinfile -a "path=./motd regex='Ansible is good' line='Ansible is ok'"
+   ansible localhost -m lineinfile -a "path=./motd regex='^Ansible is ok' line='Ansible is awesome'"
