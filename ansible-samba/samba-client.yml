@@ -1,5 +1,5 @@
 ---
-- name: Clien side sambe
+- name: Client side samba
   hosts: all
   tasks:
         - name: Install packages
@@ -8,6 +8,12 @@
                 state: latest
        # - name: Check for server shares
         #  command: smbclient -L 192.168.122.67
+        - name: Add Samba Users to System
+          user:
+                name: tom
+                uid: 2001
+        - name: Add smb password to user
+          command: echo -ne "password\npassword\n" | smbpasswd -a -s tom
         - name: Create mount point
           file:
                 path: /mnt/smbshare
