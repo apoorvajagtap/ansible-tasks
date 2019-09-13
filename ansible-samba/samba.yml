@@ -19,15 +19,23 @@
                         [sharename]
                         path = /samba
                         browseable = yes
-                        public = yes
-        - name: tom | Add the user
+                        valid users = tom, jerry
+                        write list = tom
+                        read list = jerry
+        - name: Add the user
           user:
-                name: tom
+                name: '{{ item.n }}'
                 shell: /sbin/nologin
-                uid: 2001
+                uid: '{{ item.uid }}'
+          with_items:
+                - { n: tom, uid: 2001 }
+                - { n: jerry, uid: 2002 }
           become: true
-       # - name: Add samba password
-        #  command: smbpasswd -a tom
+        - name: Add samba password
+          shell: echo -ne "password\npassword\n" | smbpasswd -a -s '{{ item }}'
+          with_items:
+                - tom
+                - jerry
         - name: Add selinux context to file
           sefcontext:
                 target: '/samba(/.*)?'
@@ -36,16 +44,19 @@
                 reload: true
         - name: Reload the SELinux changes
           command: restorecon -RFv /samba
-        - name: Start the nmb  service
+        - name: Start the service
           service:
-                name:  nmb
+                name:  '{{ item }}'
                 state: started
                 enabled: yes
-        - name: Start the smb  service
-          service:
-                name:  smb
-                state: started
-                enabled: yes
+          with_items:
+                - smb
+                - nmb
+       # - name: Start the smb  service
+        #  service:
+         #       name:  smb
+          #      state: started
+           #     enabled: yes
         - name: Add firewall
           firewalld:
                 service: samba
